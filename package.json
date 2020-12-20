@@ -1,0 +1,16 @@
+{
+  "name": "socket.io-game",
+  "version": "0.0.0",
+  "description": "A simple game using socket.io",
+  "main": "index.js",
+  "author": "Javier Lopez",
+  "private": true,
+  "license": "BSD",
+  "dependencies": {
+    "express": "~4.17.1",
+    "socket.io": "^3.0.0"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
