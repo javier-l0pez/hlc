@@ -1,21 +1,25 @@
 // Setup basic express server
-const express = require('express');
-const app = express();
-const path = require('path');
-const server = require('http').createServer(app);
-const io = require('socket.io')(server);
-const port = process.env.PORT || 3000;
+let express = require('express');
+let app = express();
+var path = require('path');
+let server = require('http').createServer(app);
+let io = require('socket.io')(server);
+let port = process.env.PORT || 3000;
 
 server.listen(port, () => {
   console.log('Server listening at port %d', port);
 });
 
 // Routing
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname + '/public'));
+app.get('/', function (req, res) {
+  res.sendFile(__dirname + '/index.html');
+});
 
+// Player Data
 let numUsers = 0;
 
-var  players = {};
+var players = {};
 
 var scores = {
   player1: 0,
@@ -23,20 +27,20 @@ var scores = {
 };
 
 
-io.on('connection', (socket) => {
-  console.log('a user connected:' + socket.id);
+io.on('connection', function (socket) {
+  console.log('Connected user: ' + socket.id);
 
   players[socket.id] = {
     playerId: socket.id,
-    score:0,
-    active: false, 
+    score: 0,
+    active: false,
   };
 
   socket.emit('currentPlayers', players);
 
   socket.broadcast.emit('newPlayer', players[socket.id]);
 
-  socket.on('playerStartGame',function(data){
+  socket.on('playerStartStats', function (data) {
     players[socket.id].active = true;
     io.emit('currentPlayers', players);
     socket.emit('scoreUpdate', scores);
@@ -44,16 +48,16 @@ io.on('connection', (socket) => {
 
   //DISCONNECT
   socket.on('disconnect', function () {
-    console.log('user disconnected:' + socket.id);
+    console.log('User disconnected :' + socket.id);
     delete players[socket.id];
     io.emit('disconnect', socket.id);
 
   });
 
-socket.on('levelPassed', function () {
-  players[socket.id].score ++
-  io.emit('scoreUpdate', players);
-});
+  socket.on('levelPassed', function () {
+    players[socket.id].score++
+    io.emit('scoreUpdate', players);
+  });
 
 
 });
